@@ -12,11 +12,15 @@ let scale
 Tone.Transport.bpm.value = 120
 Tone.Transport.loop = true
 Tone.Transport.timeSignature = 4
-Tone.Transport.loopEnd = '4m'
+Tone.Transport.loopEnd = '8m'
 
 // chord progression, 1 degree for each measure
 // II -> V -> VI -> I
-const progression = [2, 5, 6, 1]
+const happyProgression = [1, 5, 6, 4,1, 5, 6, 4]
+const sadProgression = [6, 4, 1, 5]
+const evilProgression = [1, 5, 4, 5, 6, 5, 3, 7]
+
+let currentProgression = happyProgression
 
 function toggle () {
   if (Tone.Transport.state === 'stopped') {
@@ -48,7 +52,7 @@ function play (time) {
   // only play chord on first beat
   if (beat === 0) {
     // get the degree for this measure
-    const deg = progression[bar]
+    const deg = currentProgression[bar]
     // rotate scale to next degree (-1 to convert degree to index value)
     const rscale = nn.rotateScale(scale, deg - 1)
     // create chord shape
@@ -94,5 +98,84 @@ const pianoKeys = viz.createPianoUI({
   labels: true,
   octaves: [3, 6]
 })
+
+//Functions for moods
+
+function happy() {
+  currentProgression = happyProgression
+  Tone.Transport.bpm.value = 1000
+  const filter = new Tone.Filter(5000, "lowpass")
+  const chorus = new Tone.Chorus(3, 1.8, 0.5).start()
+  const reverb = new Tone.Reverb({ decay: 1.8, wet: 0.25 })
+  const delay = new Tone.FeedbackDelay("8n", 0.15)
+  synth.disconnect()
+  synth.connect(filter)
+  filter.connect(chorus)
+  chorus.connect(delay)
+  delay.connect(reverb)
+  reverb.toDestination()
+}
+
+function sad() {
+  currentProgression = sadProgression
+  Tone.Transport.bpm.value = 80
+  const filter = new Tone.Filter(2500, "lowpass")
+  const chorus = new Tone.Chorus(1.2, 2.5, 0.25).start()
+  const delay = new Tone.FeedbackDelay("8n", 0.25)
+  const reverb = new Tone.Reverb({ decay: 2.8, wet: 0.35 })
+  synth.disconnect()
+  synth.connect(filter)
+  filter.connect(chorus)
+  chorus.connect(delay)
+  delay.connect(reverb)
+  reverb.toDestination()
+}
+
+function evil() {
+  currentProgression = evilProgression
+  Tone.Transport.bpm.value = 1000
+  const filter = new Tone.Filter(1500, "highpass")
+  const pitchShift = new Tone.PitchShift(0)
+  const distortion = new Tone.Distortion(0.6)
+  const reverb = new Tone.Reverb({ decay: 2.5, wet: 0.4 })
+  synth.disconnect()
+  synth.connect(filter)
+  filter.connect(pitchShift)
+  pitchShift.connect(distortion)
+  pitchShift.connect(reverb)
+  reverb.toDestination()
+  
+}
+  
+function original() {
+  currentProgression = happyProgression
+  synth.disconnect()
+  synth.toDestination()
+}
+
+// Buttons to change mood preset
+nn.create('button')
+  .content('Happy')
+  .addTo('body')
+  .on('click', () => document.body.style.background = 'linear-gradient(to right, orange, yellow)')
+  .on('click', () => happy())
+  
+nn.create('button')
+  .content('Sad')
+  .addTo('body')
+  .on('click', () => document.body.style.background = 'linear-gradient(to right, blue, purple)')
+  .on('click', () => sad())
+
+nn.create('button')
+  .content('Evil')
+  .addTo('body')
+  .on('click', () => document.body.style.background = 'linear-gradient(to right, red, black)')
+  .on('click', () => evil())
+  
+nn.create('button')
+  .content('Original')
+  .addTo('body')
+  .on('click', () => document.body.style.background = 'white')
+  .on('click', () => original())
 
 </script>
