@@ -1,3 +1,14 @@
+<h1>Meditation #6</h1>
+<h2>by Maceo</h2>
+
+For this meditation, I was interested in remixing the chord progression demo from the notes. Chord progressions are something I have just recently started to get a better understanding of, and I thouroughly enjoyed playing around with the different scale and chord types.
+<p>
+  
+</p>
+When thinking of how to go about remixing this example, I took inspiration from my previous Meditation #3 to make it mood based (which I now also plan to implement for my final project). I wanted the chords to not only change sonically based on the selected mood but also reflect how different chord progressions can evoke distinct emotions. I copied over my mood functions and modified them to work with the synth rather than the player I had used before. I then reworked the signal chains for all three moods, since the effects that complemented samples didn’t translate well to layered chords as they sounded muddy. After cleaning up the effects, I experimented with BPM settings and adjusted the chord progression variables and was left with three very different sounding chord progressions.
+<p>
+</p>
+
 <body style="background: white"></body>
 <script src="https://algorithmicmusic.online/js/libs/nn.min.js"></script>
 <script src="https://unpkg.com/tone"></script>
@@ -17,8 +28,8 @@ Tone.Transport.loopEnd = '8m'
 // chord progression, 1 degree for each measure
 // II -> V -> VI -> I
 const happyProgression = [1, 5, 6, 4,1, 5, 6, 4]
-const sadProgression = [6, 4, 1, 5]
-const evilProgression = [1, 5, 4, 5, 6, 5, 3, 7]
+const sadProgression = [6, 4, 1, 5, 6, 4, 1, 5]
+const evilProgression = [1, 7, 6, 5, 4, 3, 2, 1]
 
 let currentProgression = happyProgression
 
@@ -134,16 +145,17 @@ function sad() {
 function evil() {
   currentProgression = evilProgression
   Tone.Transport.bpm.value = 1000
+  const pitchShift = new Tone.PitchShift(-1)
   const filter = new Tone.Filter(1500, "highpass")
-  const pitchShift = new Tone.PitchShift(0)
   const distortion = new Tone.Distortion(0.6)
   const reverb = new Tone.Reverb({ decay: 2.5, wet: 0.4 })
   synth.disconnect()
-  synth.connect(filter)
-  filter.connect(pitchShift)
-  pitchShift.connect(distortion)
-  pitchShift.connect(reverb)
+  synth.connect(pitchShift)
+  pitchShift.connect(filter)
+  filter.connect(distortion)
+  distortion.connect(reverb)
   reverb.toDestination()
+  
   
 }
   
